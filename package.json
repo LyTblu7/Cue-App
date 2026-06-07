@@ -1,0 +1,19 @@
+{
+  "name": "cue",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "tauri:windows:build": "tauri-windows-bundle build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.0.0",
+    "@choochmeque/tauri-windows-bundle": "^0.1.20"
+  }
+}

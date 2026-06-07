@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cue</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Контейнер с размытием (Glassmorphism/Acrylic) -->
+  <div class="window-container" id="app-window">
+    
+    <header class="app-header" data-tauri-drag-region>
+      <div class="logo" data-tauri-drag-region>
+        <span class="logo-text" data-tauri-drag-region>Cue</span>
+        <span class="header-clock" id="header-clock" data-tauri-drag-region></span>
+      </div>
+      <div class="header-actions">
+        <button class="settings-btn" id="settings-btn" title="Настройки">
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <button class="settings-btn close-btn" id="close-btn" title="Скрыть в трей">
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+      
+      <!-- Панель управления / Список таймеров -->
+      <section class="screen active" id="dashboard-screen">
+        <div class="dashboard-header">
+          <span class="section-title" id="title-active-timers">Активные таймеры</span>
+          <button class="settings-btn" id="add-timer-header-btn" title="Добавить таймер">
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
+        
+        <div class="timers-list" id="timers-list">
+          <!-- Таймеры будут создаваться динамически -->
+        </div>
+
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" width="36" height="36" stroke="var(--text-secondary)" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <p class="empty-text" id="text-empty-state">Нет активных таймеров</p>
+          <button class="start-btn" id="empty-add-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span id="btn-create-timer-empty">Создать таймер</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Экран создания таймера -->
+      <section class="screen" id="setup-screen">
+        <div class="screen-header">
+          <button class="back-btn" id="setup-back-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span id="btn-back-to-list">К списку</span>
+          </button>
+        </div>
+
+        <div class="input-group">
+          <label for="timer-name" id="label-timer-name">Назва таймера</label>
+          <input type="text" id="timer-name" placeholder="Наприклад: Зарядка для очей" value="Перерва">
+        </div>
+
+        <div class="time-presets">
+          <button class="preset-btn" data-time="5">5 хв</button>
+          <button class="preset-btn active" data-time="15">15 хв</button>
+          <button class="preset-btn" data-time="30">30 хв</button>
+          <button class="preset-btn" data-time="60">60 хв</button>
+        </div>
+
+        <div class="custom-time-picker-container">
+          <label id="label-custom-time">Или свое время</label>
+          <div class="fluent-time-picker" id="time-picker-trigger">
+            <span class="picker-time-value" id="picker-time-display">15 мин 00 сек</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+        </div>
+
+        <!-- Всплывающее меню выбора времени (Flyout) -->
+        <div class="time-picker-flyout" id="time-picker-flyout">
+          <div class="flyout-columns">
+            <div class="flyout-column" id="column-minutes" data-type="minutes">
+              <div class="column-header">мин</div>
+              <div class="scroll-wheel" id="wheel-minutes">
+                <!-- Динамические значения минут (00-99) -->
+              </div>
+            </div>
+            <div class="flyout-column" id="column-seconds" data-type="seconds">
+              <div class="column-header">сек</div>
+              <div class="scroll-wheel" id="wheel-seconds">
+                <!-- Динамические значения секунд (00-59) -->
+              </div>
+            </div>
+          </div>
+          <div class="flyout-actions">
+            <button class="flyout-action-btn confirm" id="picker-confirm" title="Принять">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button class="flyout-action-btn cancel" id="picker-cancel" title="Отмена">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="start-btn" id="start-timer-btn">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          <span id="btn-start-timer">Запустить таймер</span>
+        </button>
+      </section>
+
+      <!-- Экран фокуса на таймере (виджет) -->
+      <section class="screen" id="focus-screen" data-tauri-drag-region>
+        <div class="screen-header" data-tauri-drag-region style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <button class="back-btn" id="focus-back-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span id="btn-focus-back">Панель</span>
+          </button>
+          <div class="focus-header-actions">
+            <button class="settings-btn" id="focus-pin-btn" title="Компактный режим (поверх окон)">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10"></path><rect x="15" y="15" width="7" height="7" rx="1"></rect><line x1="8" y1="16" x2="14" y2="10"></line><polyline points="14 14 14 10 10 10"></polyline></svg>
+            </button>
+            <button class="settings-btn close-btn" id="focus-close-btn" title="Скрыть в трей">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="timer-display-container" data-tauri-drag-region>
+          <svg class="progress-ring" viewBox="0 0 160 160" width="160" height="160" data-tauri-drag-region>
+            <circle class="progress-ring__circle-bg" stroke="rgba(0,0,0,0.04)" stroke-width="6" fill="transparent" r="70" cx="80" cy="80"/>
+            <circle class="progress-ring__circle" id="focus-progress-circle" stroke="var(--accent-color)" stroke-width="6" fill="transparent" r="70" cx="80" cy="80"/>
+          </svg>
+          <div class="timer-text" data-tauri-drag-region>
+            <div class="time-left" id="focus-time-display" data-tauri-drag-region>15:00</div>
+            <div class="task-title" id="focus-title-display" data-tauri-drag-region>Перерыв</div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="control-btn" id="focus-pause-btn">
+            <span class="btn-icon"></span>
+            <span class="btn-text" id="text-focus-pause">Пауза</span>
+          </button>
+          <button class="control-btn cancel" id="focus-delete-btn">
+            <span class="btn-icon">
+              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </span>
+            <span class="btn-text" id="text-focus-delete">Сбросить</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Экран настроек -->
+      <section class="screen" id="settings-screen">
+        <div class="settings-header">
+          <button class="back-btn" id="settings-back-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span id="btn-settings-back">Назад</span>
+          </button>
+          
+          <div class="custom-select theme-header-select" id="theme-select-wrapper">
+            <div class="settings-btn custom-select-trigger" id="theme-select-trigger" title="Тема оформлення">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2v20M12 2a10 10 0 0 0 0 20Z" fill="currentColor"></path>
+              </svg>
+            </div>
+            <div class="custom-options" id="theme-select-options">
+              <div class="custom-option" data-value="light" id="opt-theme-light">Світла</div>
+              <div class="custom-option" data-value="dark" id="opt-theme-dark">Темна</div>
+              <div class="custom-option" data-value="system" id="opt-theme-system">Системна</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-list">
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title" id="title-sound">Звуковые сигналы</div>
+              <div class="setting-desc" id="desc-sound">Звук при завершении</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-sound" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title" id="title-notifications">Уведомления</div>
+              <div class="setting-desc" id="desc-notifications">Системные всплывающие сообщения</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-notifications" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title" id="title-autohide">Сворачивать при старте</div>
+              <div class="setting-desc" id="desc-autohide">Скрывать окно в трей при запуске</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-autohide">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title" id="title-lang">Мова інтерфейсу</div>
+              <div class="setting-desc" id="desc-lang">Виберіть мову програми</div>
+            </div>
+            <div class="custom-select" id="lang-select-wrapper">
+              <div class="custom-select-trigger" id="lang-select-trigger">
+                <span>Українська</span>
+                <svg viewBox='0 0 24 24' width='12' height='12' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>
+              </div>
+              <div class="custom-options" id="lang-select-options">
+                <div class="custom-option" data-value="uk">Українська</div>
+                <div class="custom-option" data-value="en">English</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title" id="title-time-format">Формат времени</div>
+              <div class="setting-desc" id="desc-time-format">Выберите 12-часовой (AM/PM) или 24-часовой формат</div>
+            </div>
+            <div class="custom-select" id="format-select-wrapper">
+              <div class="custom-select-trigger" id="format-select-trigger">
+                <span>24h</span>
+                <svg viewBox='0 0 24 24' width='12' height='12' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>
+              </div>
+              <div class="custom-options" id="format-select-options">
+                <div class="custom-option" data-value="24h">24h</div>
+                <div class="custom-option" data-value="12h">12h</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

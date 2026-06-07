@@ -1,0 +1,1421 @@
+:root {
+  --bg-color: rgba(255, 255, 255, 0.93);
+  /* Bright white acrylic background */
+  --border-color: rgba(0, 0, 0, 0.08);
+  --text-primary: #1a1a1a;
+  --text-secondary: rgba(0, 0, 0, 0.6);
+  --accent-color: #7b79d1;
+  --accent-hover: #8c8be3;
+  --control-bg: #ffffff;
+  --control-border: rgba(0, 0, 0, 0.06);
+  --control-hover: #f6f6f6;
+  --control-active: rgba(230, 230, 230, 0.7);
+  --font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+}
+
+:root.dark-theme {
+  --bg-color: rgba(20, 20, 20, 0.97);
+  /* Deep dark theme background */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --accent-color: #60cdff;
+  /* Standard Windows 11 light blue accent in dark mode */
+  --accent-hover: #76d4ff;
+  --control-bg: rgba(255, 255, 255, 0.06);
+  /* Fluent dark button background */
+  --control-border: rgba(255, 255, 255, 0.08);
+  --control-hover: rgba(255, 255, 255, 0.09);
+  --control-active: rgba(255, 255, 255, 0.03);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+[data-tauri-drag-region] {
+  cursor: move;
+}
+
+button,
+input,
+select,
+label,
+.settings-btn,
+.timer-card-btn,
+.num-adjust,
+.back-btn,
+.control-btn,
+.preset-btn {
+  cursor: pointer;
+}
+
+/* Очищаем фон веб-компонента WebView, чтобы работал transparent */
+html,
+body {
+  background: transparent !important;
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Окно с размытием (Acrylic Light) */
+.window-container {
+  width: 320px;
+  height: 450px;
+  background: var(--bg-color);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  /* Углы окон в Win11 - 8px для Flyout */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Хэдер */
+.app-header {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent-color);
+}
+
+.logo-text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-btn.close-btn:hover {
+  background: rgba(224, 32, 32, 0.08) !important;
+  color: #d82e2e !important;
+}
+
+.settings-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+}
+
+.settings-btn.active {
+  color: var(--accent-color);
+  background: rgba(123, 121, 209, 0.08);
+}
+
+.settings-btn.active:hover {
+  background: rgba(123, 121, 209, 0.15);
+}
+
+/* Контент и Экраны */
+.app-main {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.97);
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+/* Карточка контента в стиле календаря Win11 */
+.screen>* {
+  z-index: 1;
+}
+
+/* Поля ввода и группы элементов */
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label,
+.custom-time label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.input-group input {
+  width: 100%;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.4);
+  /* Подсветка низа */
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.input-group input:hover {
+  background: var(--control-hover);
+  border-bottom-color: rgba(0, 0, 0, 0.6);
+}
+
+.input-group input:focus {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.04);
+  border-bottom: 1.5px solid var(--accent-color);
+  /* Синяя линия фокуса */
+}
+
+/* Пресеты времени */
+.time-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.preset-btn {
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 450;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-btn:hover {
+  background: var(--control-hover);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.preset-btn:active {
+  background: var(--control-active);
+}
+
+.preset-btn.active {
+  background: var(--accent-color);
+  color: #ffffff;
+  font-weight: 550;
+  border-color: var(--accent-color);
+  box-shadow: none;
+}
+
+/* Кастомный выбор минут и секунд (Fluent TimePicker в стиле Windows 11) */
+.custom-time-picker-container {
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 5;
+  /* Создаем контекст наложения для оверлея */
+}
+
+.custom-time-picker-container label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.fluent-time-picker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.fluent-time-picker:hover {
+  background: var(--control-hover);
+  border-bottom-color: rgba(0, 0, 0, 0.6);
+}
+
+.fluent-time-picker.open {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.04);
+  border-bottom: 1.5px solid var(--accent-color);
+}
+
+:root.dark-theme .fluent-time-picker {
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
+:root.dark-theme .fluent-time-picker:hover {
+  border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
+:root.dark-theme .fluent-time-picker.open {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom-color: var(--accent-color);
+}
+
+/* Оверлей выбора времени (Flyout) в стиле Windows 11 */
+.time-picker-flyout {
+  position: absolute;
+  top: 48px;
+  /* Ниже кнопки "Назад" */
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 232px;
+  /* Четное число для идеального пиксельного рендеринга по центру */
+  background: rgba(251, 251, 251, 0.95);
+  /* Fluent Acrylic Mica-like */
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  /* Углы окон Win11 Flyout */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  /* Тень направлена вниз */
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  padding: 0;
+  /* Убираем общий паддинг, чтобы разделители прилегали к краям */
+  overflow: hidden;
+  /* Обрезаем углы нижних кнопок под border-radius родителя */
+  animation: fluent-flyout-in 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.time-picker-flyout.open {
+  display: flex;
+}
+
+:root.dark-theme .time-picker-flyout {
+  background: rgba(32, 32, 32, 0.96);
+  /* Win11 Dark Acrylic */
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes fluent-flyout-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.flyout-columns {
+  display: flex;
+  height: 224px;
+  /* 7 элементов по 32px */
+  justify-content: center;
+  position: relative;
+  padding: 4px 4px 0 4px;
+  /* Отступы по бокам и сверху для колонок */
+}
+
+/* Высокопроизводительные оверлеи для эффекта цилиндра без лагов маски */
+.flyout-columns::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(251, 251, 251, 0.96) 0%, rgba(251, 251, 251, 0) 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.flyout-columns::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to top, rgba(251, 251, 251, 0.96) 0%, rgba(251, 251, 251, 0) 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+:root.dark-theme .flyout-columns::before {
+  background: linear-gradient(to bottom, rgba(32, 32, 32, 0.97) 0%, rgba(32, 32, 32, 0) 100%);
+}
+
+:root.dark-theme .flyout-columns::after {
+  background: linear-gradient(to top, rgba(32, 32, 32, 0.97) 0%, rgba(32, 32, 32, 0) 100%);
+}
+
+.flyout-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Напоминает нативный селектор Windows 11: подсветка только внутри каждой колонки отдельно */
+.flyout-column::after {
+  content: "";
+  position: absolute;
+  top: 96px;
+  /* Центрировано на среднем (4-м) элементе: 32px * 3 = 96px */
+  left: 2px;
+  right: 2px;
+  height: 32px;
+  background: #c2bfe8;
+  /* Красивая сиреневая плашка как на скриншоте */
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 0;
+  /* Под текстом */
+  transition: background 0.15s ease;
+}
+
+:root.dark-theme .flyout-column::after {
+  background: rgba(123, 121, 209, 0.35);
+  /* Полупрозрачная сиреневая плашка в темной теме */
+}
+
+.flyout-column:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:root.dark-theme .flyout-column:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.column-header {
+  display: none;
+}
+
+.scroll-wheel {
+  height: 224px;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.wheel-item {
+  height: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.1s ease;
+  user-select: none;
+  position: relative;
+  z-index: 3;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.wheel-item:hover {
+  color: var(--text-primary);
+}
+
+.wheel-item.active {
+  color: #000000;
+  /* Темный текст на сиреневой плашке для читаемости */
+  font-weight: 600;
+}
+
+:root.dark-theme .wheel-item.active {
+  color: #ffffff;
+  /* Белый текст на сиреневой плашке в темной теме */
+}
+
+.wheel-spacer {
+  height: 96px;
+  /* 3 пустых элемента сверху и снизу для центрирования крайних значений */
+  min-height: 96px;
+  pointer-events: none;
+}
+
+/* Кнопки подтверждения и отмены */
+.flyout-actions {
+  display: flex;
+  margin-top: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0;
+  height: 40px;
+}
+
+:root.dark-theme .flyout-actions {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.flyout-action-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--text-secondary);
+}
+
+.flyout-action-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+}
+
+.flyout-action-btn:first-child {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:root.dark-theme .flyout-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root.dark-theme .flyout-action-btn:first-child {
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Кнопка запуска (Дизайн 1-в-1 как кнопка Focus в календаре Windows 11) */
+.start-btn {
+  width: 100%;
+  background: #ffffff;
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 9px;
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.start-btn:hover {
+  background: var(--control-hover);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.start-btn:active {
+  transform: scale(0.985);
+  background: #f3f3f3;
+}
+
+/* Панель управления / Список таймеров */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.timers-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 6px;
+  margin-bottom: 12px;
+}
+
+/* Красивый скроллбар в стиле Windows 11 */
+.timers-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timers-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timers-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.timers-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Карточка таймера */
+.timer-card {
+  flex-shrink: 0;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  padding: 10px 12px 14px 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.timer-card:hover {
+  background: var(--control-hover);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.timer-card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timer-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.timer-card-name {
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.timer-card-time {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  font-weight: 450;
+}
+
+.timer-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.timer-card-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.timer-card-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+}
+
+.timer-card-btn.active {
+  color: var(--accent-color);
+  background: rgba(123, 121, 209, 0.08);
+}
+
+.timer-card-btn.active:hover {
+  background: rgba(123, 121, 209, 0.15);
+}
+
+.timer-card-btn.delete:hover {
+  background: rgba(224, 32, 32, 0.08);
+  color: #d82e2e;
+}
+
+/* Прогресс-бар внизу карточки */
+.timer-card-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent-color);
+  width: 100%;
+  transition: width 0.2s ease-out;
+}
+
+.timer-card.paused .timer-card-progress-bar {
+  background: #a0a0a0;
+}
+
+.timer-card.finished {
+  border-color: rgba(123, 121, 209, 0.25);
+  background: rgba(123, 121, 209, 0.04);
+}
+
+.timer-card.finished .timer-card-name {
+  color: var(--accent-color);
+}
+
+/* Состояние "Нет таймеров" */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.empty-icon {
+  opacity: 0.7;
+}
+
+.empty-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 180px;
+  line-height: 1.4;
+}
+
+/* Кнопка возврата наверх / создания */
+.screen-header {
+  margin-bottom: 12px;
+}
+
+/* Экран Настроек */
+.settings-header {
+  width: 100%;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 100;
+  padding-right: 10px;
+}
+
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.back-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto !important;
+  padding-right: 4px;
+  padding-bottom: 80px;
+}
+
+/* Красивый скроллбар в стиле Windows 11 */
+.settings-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settings-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.settings-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 75%;
+}
+
+.setting-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Переключатель в стиле Windows 11 Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  border-radius: 20px;
+  transition: all 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  transition: all 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.toggle-switch input:checked+.toggle-slider {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.toggle-switch input:checked+.toggle-slider:before {
+  transform: translateX(18px);
+  background-color: #ffffff;
+}
+
+.toggle-switch input:hover+.toggle-slider {
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
+.toggle-switch input:checked:hover+.toggle-slider {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Экран фокуса таймера */
+.timer-display-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 10px 0 20px 0;
+  flex: 1;
+}
+
+.timer-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-left {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+.task-title {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring__circle-bg {
+  stroke: rgba(0, 0, 0, 0.04);
+}
+
+.progress-ring__circle {
+  stroke: var(--accent-color);
+  transition: stroke-dashoffset 0.35s;
+  transform-origin: 50% 50%;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.control-btn {
+  flex: 1;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.control-btn:hover {
+  background: var(--control-hover);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.control-btn:active {
+  background: var(--control-active);
+}
+
+.control-btn.cancel {
+  border-color: rgba(224, 32, 32, 0.15);
+  color: #d82e2e;
+}
+
+.control-btn.cancel:hover {
+  background: rgba(224, 32, 32, 0.04);
+  border-color: rgba(224, 32, 32, 0.25);
+}
+
+.control-btn .btn-icon {
+  display: none;
+}
+
+.control-btn .btn-text {
+  display: inline;
+}
+
+/* Компактный режим для иконок и текста */
+.window-container.compact .control-btn .btn-text {
+  display: none !important;
+}
+
+.window-container.compact .control-btn .btn-icon {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Компактный режим виджета */
+.window-container.compact {
+  width: 220px;
+  height: 220px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+.window-container.compact .app-header {
+  display: none !important;
+}
+
+.window-container.compact #focus-screen {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.window-container.compact #focus-back-btn {
+  display: none !important;
+}
+
+#focus-close-btn {
+  display: none !important;
+}
+
+.window-container.compact #focus-close-btn {
+  display: flex !important;
+}
+
+.window-container.compact .focus-header-actions {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.window-container.compact .progress-ring {
+  display: block;
+  width: 110px;
+  height: 110px;
+}
+
+.window-container.compact .timer-display-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 4px auto 0 auto;
+  width: 110px;
+  height: 110px;
+}
+
+.window-container.compact .timer-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.window-container.compact .time-left {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+}
+
+.window-container.compact .task-title {
+  display: none;
+}
+
+.window-container.compact .action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  justify-content: center;
+  width: 100%;
+}
+
+.window-container.compact .control-btn {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Кнопка запуска (фиолетовая залитая) */
+.window-container.compact #focus-pause-btn {
+  background: var(--accent-color);
+  color: #ffffff;
+  border: none;
+}
+
+.window-container.compact #focus-pause-btn:hover {
+  background: var(--accent-hover);
+}
+
+.window-container.compact #focus-pause-btn:active {
+  transform: scale(0.95);
+}
+
+/* Кнопка сброса (серо-белая) */
+.window-container.compact #focus-delete-btn {
+  background: #ffffff;
+  color: var(--text-secondary);
+  border: 1px solid var(--control-border);
+}
+
+.window-container.compact #focus-delete-btn:hover {
+  background: var(--control-hover);
+  color: var(--text-primary);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.window-container.compact #focus-delete-btn:active {
+  transform: scale(0.95);
+}
+
+.window-container.compact .control-btn .btn-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Кастомный выпадающий список (Fluent Dropdown) */
+.custom-select {
+  position: relative;
+  width: 125px;
+  user-select: none;
+  z-index: 10;
+}
+
+.custom-select.open {
+  z-index: 110 !important;
+}
+
+.custom-select-trigger {
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 12.5px;
+  font-weight: 450;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.15s;
+  gap: 8px;
+}
+
+.custom-select-trigger:hover {
+  background-color: var(--control-hover);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.custom-select.open .custom-select-trigger {
+  background-color: #ffffff;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.custom-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+  padding: 4px;
+}
+
+#format-select-wrapper .custom-options {
+  top: auto;
+  bottom: calc(100% + 4px);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.custom-select.open .custom-options {
+  display: flex;
+}
+
+.custom-option {
+  padding: 6px 10px;
+  font-size: 12.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s;
+  text-align: left;
+}
+
+.custom-option:hover {
+  background: var(--control-hover);
+}
+
+.custom-option.selected {
+  background: rgba(123, 121, 209, 0.08);
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.header-clock {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid var(--border-color);
+}
+
+/* Оверрайды элементов для темной темы */
+:root.dark-theme .custom-options {
+  background: #2c2c2c;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark-theme .custom-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark-theme .custom-option.selected {
+  background: rgba(96, 205, 255, 0.15);
+  color: var(--accent-color);
+}
+
+:root.dark-theme .custom-select-trigger {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+:root.dark-theme .custom-select-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root.dark-theme .custom-select.open .custom-select-trigger {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+:root.dark-theme .input-group input {
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+:root.dark-theme .input-group input:focus {
+  border-bottom: 1.5px solid var(--accent-color);
+}
+
+:root.dark-theme .preset-btn.active {
+  color: #000000;
+}
+
+:root.dark-theme .progress-ring__circle-bg {
+  stroke: rgba(255, 255, 255, 0.04);
+}
+
+:root.dark-theme .setting-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+:root.dark-theme .control-btn.cancel {
+  border-color: rgba(224, 32, 32, 0.3);
+  color: #ff6b6b;
+}
+
+:root.dark-theme .control-btn.cancel:hover {
+  background: rgba(224, 32, 32, 0.08);
+  border-color: rgba(224, 32, 32, 0.45);
+}
+
+:root.dark-theme .timer-card-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark-theme .timer-card-btn.active {
+  background: rgba(96, 205, 255, 0.15);
+  color: var(--accent-color);
+}
+
+:root.dark-theme .start-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark-theme .start-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root.dark-theme .start-btn:active {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+:root.dark-theme .number-input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark-theme .number-input:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root.dark-theme .num-adjust:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:root.dark-theme .timer-card:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root.dark-theme .timer-card.finished {
+  border-color: rgba(96, 205, 255, 0.25);
+  background: rgba(96, 205, 255, 0.04);
+}
+
+:root.dark-theme .toggle-slider {
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+:root.dark-theme .toggle-slider:before {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+:root.dark-theme .toggle-switch input:checked+.toggle-slider:before {
+  background-color: #000000;
+}
+
+/* Переопределения для темы в шапке настроек */
+.theme-header-select {
+  width: auto !important;
+  margin-right: 10px;
+}
+
+.theme-header-select .custom-select-trigger {
+  background: transparent !important;
+  border: none !important;
+  padding: 6px !important;
+  box-shadow: none !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.theme-header-select .custom-select-trigger:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border: none !important;
+}
+
+:root.dark-theme .theme-header-select .custom-select-trigger:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.theme-header-select .custom-options {
+  top: calc(100% + 4px) !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: 0 !important;
+  width: 110px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.theme-header-select.open .custom-select-trigger {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:root.dark-theme .theme-header-select.open .custom-select-trigger {
+  background: rgba(255, 255, 255, 0.12) !important;
+}

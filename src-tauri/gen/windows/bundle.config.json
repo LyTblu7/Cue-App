@@ -1,0 +1,22 @@
+{
+  "publisher": "CN=A4C64F15-442E-4208-930C-0D2A49ADDBDB",
+  "publisherDisplayName": "LyTblu7",
+  "capabilities": {
+    "general": [
+      "internetClient"
+    ]
+  },
+  "extensions": {
+    "shareTarget": false,
+    "fileAssociations": [],
+    "protocolHandlers": []
+  },
+  "signing": {
+    "pfx": null,
+    "pfxPassword": null
+  },
+  "resourceIndex": {
+    "enabled": false,
+    "keepConfig": false
+  }
+}
